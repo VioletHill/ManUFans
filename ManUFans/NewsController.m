@@ -70,7 +70,7 @@
     {
 		EGORefreshTableHeaderView *view = [[EGORefreshTableHeaderView alloc] initWithFrame:CGRectMake(0.0f, 0.0f - self.tableView.frame.size.height, self.view.bounds.size.width, self.tableView.bounds.size.height)];
 		view.delegate = self;
-        view.navigationHeight=64;   //顶部的高度 不是navigationbar的高度。。。
+        view.navigationHeight=64;           //顶部的高度 不是navigationbar的高度。。。
 		[self.tableView addSubview:view];
 		_refreshHeaderView = view;
 	}
@@ -91,8 +91,6 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    // Return the number of rows in the section.
-
     return self.dataTitleArray.count;
 }
 
@@ -113,8 +111,6 @@
 // In a story board-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender
 {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
     UITableViewCell* cell=(UITableViewCell*)sender;
     NSIndexPath* indexPath=[self.tableView indexPathForCell:cell];
     NewsPageController* viewController=segue.destinationViewController;
