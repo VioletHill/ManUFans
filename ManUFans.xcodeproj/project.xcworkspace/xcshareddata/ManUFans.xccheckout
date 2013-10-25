@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>28C9F3C8-8164-4F82-AC46-0D4A241A0D2F</string>
+	<key>IDESourceControlProjectName</key>
+	<string>ManUFans</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>065CCB40-BBBF-4A3F-8643-94E211BB9550</key>
+		<string>https://github.com/VioletHill/ManUFans.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>ManUFans.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>065CCB40-BBBF-4A3F-8643-94E211BB9550</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/VioletHill/ManUFans.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>065CCB40-BBBF-4A3F-8643-94E211BB9550</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>065CCB40-BBBF-4A3F-8643-94E211BB9550</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ManUFans</string>
+		</dict>
+	</array>
+</dict>
+</plist>
