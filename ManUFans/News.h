@@ -24,5 +24,9 @@
  */
 -(void) saveNewData;
 
+-(NSString*) getNewsContentByHref:(NSString*)href;
+
+@property(nonatomic,weak) id delegate;
+
 @end
 

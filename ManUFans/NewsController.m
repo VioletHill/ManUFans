@@ -13,13 +13,13 @@
 @interface NewsController ()
 
 @property (nonatomic,retain) NSMutableArray* dataTitleArray;
+@property (nonatomic,retain) NSMutableArray* dataHrefArray;
+@property (nonatomic,retain) NSMutableArray* hrefArray;
 
 @end
 
 @implementation NewsController
-{
-    NSArray* newData;
-}
+
 
 @synthesize dataTitleArray=_dataTitleArray;
 
@@ -32,31 +32,30 @@
     return self;
 }
 
--(void) addNewsFrom:(NSArray*)array
+-(NSMutableArray*) dataHrefArray
 {
-   
-    NSString* firstData=[self.dataTitleArray firstObject];
-    for (int i=0; i<array.count; i++)
+    if (_dataHrefArray==nil)
     {
-        NSString* obj=[array objectAtIndex:i];
-        if (firstData==nil || ![obj isEqualToString:firstData])
-        {
-            [self.dataTitleArray insertObject:obj atIndex:i];
-        }
-        else
-        {
-            break;
-        }
+        _dataHrefArray=[[NSMutableArray alloc] init];
     }
-    [[News sharedNews] saveNewData];
+    return _dataHrefArray;
+}
 
-    [self.tableView reloadData];
+-(NSMutableArray*) hrefArray
+{
+    if (_hrefArray==nil)
+    {
+        _hrefArray=[[NSMutableArray alloc] init];
+    }
+    return _hrefArray;
 }
 
 -(NSMutableArray*) dataTitleArray
 {
     if (_dataTitleArray==nil)
     {
+        //第一次的调用时，deletage是dataHrefArray
+        [News sharedNews].delegate=self.dataHrefArray;
         _dataTitleArray=[[[News sharedNews] getNews] mutableCopy];
     }
     return _dataTitleArray;
@@ -113,8 +112,9 @@
 {
     UITableViewCell* cell=(UITableViewCell*)sender;
     NSIndexPath* indexPath=[self.tableView indexPathForCell:cell];
+    
     NewsPageController* viewController=segue.destinationViewController;
-    viewController.news=[self.dataTitleArray objectAtIndex:indexPath.row];
+    viewController.newsHref=[self.dataHrefArray objectAtIndex:indexPath.row];
 }
 
 
@@ -127,9 +127,34 @@
     [NSThread detachNewThreadSelector:@selector(doInBackground) toTarget:self withObject:nil];
 }
 
+-(void) addNewsFrom:(NSArray*)array
+{
+    
+    NSString* firstData=[self.dataTitleArray firstObject];
+    for (int i=0; i<array.count; i++)
+    {
+        NSString* obj=[array objectAtIndex:i];
+        if (firstData==nil || ![obj isEqualToString:firstData])
+        {
+            [self.dataTitleArray insertObject:obj atIndex:i];
+            [self.dataHrefArray insertObject:[self.hrefArray objectAtIndex:i] atIndex:i];
+        }
+        else
+        {
+            break;
+        }
+    }
+    
+    [self.tableView reloadData];
+}
+
+
 - (void)doneLoadingTableViewData
 {
     [[News sharedNews] saveNewData];
+    //每次调用前要先清空href
+    self.hrefArray=nil;
+    [News sharedNews].delegate=self.hrefArray;
     [self addNewsFrom:[[News sharedNews] getNews]];
     _reloading = NO;
 	[_refreshHeaderView egoRefreshScrollViewDataSourceDidFinishedLoading:self.tableView];

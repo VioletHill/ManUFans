@@ -11,6 +11,6 @@
 
 @interface NewsPageController : ViewController
 
-@property (nonatomic,retain) ManUnitedNewsEntities* news;
+@property (nonatomic,copy) NSString* newsHref;
 
 @end

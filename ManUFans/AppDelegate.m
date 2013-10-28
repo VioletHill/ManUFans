@@ -12,7 +12,6 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    NSLog(@"%@",NSHomeDirectory());
     // Override point for customization after application launch.
     [MagicalRecord setDefaultModelNamed:@"ManUFans.momd"];
     

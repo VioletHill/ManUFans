@@ -7,14 +7,20 @@
 //
 
 #import "NewsPageController.h"
+#import "News.h"
 
 @interface NewsPageController ()
 
+@property (nonatomic,retain) IBOutlet UIWebView *webView;
+@property (nonatomic,retain) UIActivityIndicatorView* span;
 @end
 
 @implementation NewsPageController
 
-@synthesize news=_news;
+@synthesize newsHref=_newsHref;
+@synthesize span=_span;
+
+
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -22,14 +28,53 @@
     if (self) {
         // Custom initialization
     }
+
     return self;
 }
+
+-(UIWebView*) webView
+{
+    if (_webView==nil)
+    {
+        _webView=[[UIWebView alloc] initWithFrame:self.view.frame];
+        [self.view addSubview:_webView];
+    }
+    return _webView;
+}
+
+-(UIActivityIndicatorView*) span
+{
+    if (_span==nil)
+    {
+        _span=[[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
+        _span.center=CGPointMake(self.view.frame.size.width/2,self.view.frame.size.height/2);
+        [_span startAnimating];
+    }
+    return _span;
+}
+
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-	// Do any additional setup after loading the view.
+    [self.view addSubview:self.span];
+
+    self.webView.hidden=true;
 }
+
+-(void) viewDidAppear:(BOOL)animated
+{
+    NSString* a=[[News sharedNews] getNewsContentByHref:self.newsHref];
+    if (a==nil || [a isEqualToString:@""])
+    {
+        UIAlertView* alertView=[[UIAlertView alloc] initWithTitle:@"数据加载失败" message:@"对不起，数据加载失败，该消息可能已经被官方取消" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+        [alertView show];
+    }
+    [self.webView loadHTMLString:a baseURL:nil];
+    [self.span removeFromSuperview];
+    self.webView.hidden=false;
+}
+
 
 - (void)didReceiveMemoryWarning
 {

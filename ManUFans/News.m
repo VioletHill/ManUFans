@@ -15,6 +15,7 @@
 @property (nonatomic,copy) NSString* mainWeb;
 @property (nonatomic, retain) NSMutableArray* flag;
 
+
 @end
 
 @implementation News
@@ -25,6 +26,7 @@
 
 @synthesize mainWeb=_mainWeb;
 @synthesize flag=_flag;
+@synthesize delegate;
 
 static News* _sharedNews;
 
@@ -78,7 +80,10 @@ static News* _sharedNews;
 
 -(void) saveNewData
 {
+    if (titleArray==nil) return ;
+    
     NSArray* database=[ManUnitedNewsEntities findAll];
+    
     [self resetFlagWithCount:(int)titleArray.count];
     
     for (int i=0; i<titleArray.count; i++)
@@ -88,8 +93,10 @@ static News* _sharedNews;
         [self updateNewsWithHref:href title:title andId:(int)titleArray.count*i inDataArray:database];
     }
     
-    
     [self clearUnflagObjInDataArray:database];
+    
+    titleArray=nil;
+    hrefArray=nil;
 }
 
 -(void) clearUnflagObjInDataArray:(NSArray*)array
@@ -143,6 +150,7 @@ static News* _sharedNews;
         NSLog(@"%@",error);
         UIAlertView* errorView=[[UIAlertView alloc] initWithTitle:@"获取信息失败" message:@"检查网络是否正常，如一切正常，请联系我们,谢谢您的支持" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
         [errorView show];
+        return ;
     }
 
     NSData *htmlData = [htmlString dataUsingEncoding:NSUTF8StringEncoding];
@@ -160,9 +168,52 @@ static News* _sharedNews;
     for (ManUnitedNewsEntities* obj in array)
     {
         NSString* title=obj.title;
+        if (self.delegate!=nil)
+        {
+            [self.delegate addObject:obj.contentUrl];
+        }
         [res addObject:title];
     }
+    
     return res;
+}
+
+-(NSString*) getNewsContentFromWebSite:(NSString*)href
+{
+    NSError* error=nil;
+    NSString* htmlString=[NSString stringWithContentsOfURL:[[NSURL alloc] initWithString:href] encoding:NSUTF8StringEncoding error:&error];
+    
+    if (error)
+    {
+        NSLog(@"%@",error);
+        UIAlertView* errorView=[[UIAlertView alloc] initWithTitle:@"获取信息失败" message:@"检查网络是否正常，如一切正常，请联系我们,谢谢您的支持" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+        [errorView show];
+        return nil;
+    }
+    
+    NSData *htmlData = [htmlString dataUsingEncoding:NSUTF8StringEncoding];
+    TFHpple* xpathParser = [[TFHpple alloc] initWithHTMLData:htmlData];
+    TFHppleElement* ele=[[xpathParser searchWithXPathQuery:@"//div[@class='newsStory']"] firstObject];
+    return ele.raw;
+}
+
+-(NSString*) getNewsContentByHref:(NSString*)href
+{
+    NSArray* array=[ManUnitedNewsEntities findAllSortedBy:@"newsID" ascending:YES];
+    for (ManUnitedNewsEntities* obj in array)
+    {
+        if ([obj.contentUrl isEqualToString:href])
+        {
+            if (obj.content!=nil || [obj.content isEqualToString:@""]) return obj.content;
+            else
+            {
+                obj.content=[self getNewsContentFromWebSite:href];
+                [[NSManagedObjectContext defaultContext] saveToPersistentStoreAndWait];
+                return obj.content;
+            }
+        }
+    }
+    return [self getNewsContentFromWebSite:href];
 }
 
 @end
