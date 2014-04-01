@@ -65,9 +65,14 @@
 -(void) viewDidAppear:(BOOL)animated
 {
     NSString* a=[[News sharedNews] getNewsContentByHref:self.newsHref];
-    if (a==nil || [a isEqualToString:@""])
+    
+    if ([a isEqualToString:@"errorWithNoConnect"])
     {
-        UIAlertView* alertView=[[UIAlertView alloc] initWithTitle:@"数据加载失败" message:@"对不起，数据加载失败，该消息可能已经被官方取消" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
+        a=nil;
+    }
+    else if ( a==nil || [a isEqualToString:@""])
+    {
+        UIAlertView* alertView=[[UIAlertView alloc] initWithTitle:@"数据加载失败" message:@"对不起，数据加载失败，该消息可能已经被官方取消或无法解析" delegate:nil cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
         [alertView show];
     }
     [self.webView loadHTMLString:a baseURL:nil];

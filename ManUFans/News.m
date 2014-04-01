@@ -178,6 +178,21 @@ static News* _sharedNews;
     return res;
 }
 
+
+-(NSString*) getContentFromeCurrentUrl:(NSString*)href
+{
+    NSError* error=nil;
+    NSString* htmlString=[NSString stringWithContentsOfURL:[[NSURL alloc] initWithString:href] encoding:NSUTF8StringEncoding error:&error];
+    
+    if (error) return nil;
+    
+    NSData *htmlData = [htmlString dataUsingEncoding:NSUTF8StringEncoding];
+    TFHpple* xpathParser = [[TFHpple alloc] initWithHTMLData:htmlData];
+    TFHppleElement* ele=[[xpathParser searchWithXPathQuery:@"//div[@class='newsStory']"] firstObject];
+    
+    return ele.raw;
+}
+
 -(NSString*) getNewsContentFromWebSite:(NSString*)href
 {
     NSError* error=nil;
@@ -188,13 +203,53 @@ static News* _sharedNews;
         NSLog(@"%@",error);
         UIAlertView* errorView=[[UIAlertView alloc] initWithTitle:@"获取信息失败" message:@"检查网络是否正常，如一切正常，请联系我们,谢谢您的支持" delegate:self cancelButtonTitle:@"确定" otherButtonTitles:nil, nil];
         [errorView show];
-        return nil;
+        return [NSString stringWithFormat:@"errorWithNoConnect"];
     }
+    
+  
     
     NSData *htmlData = [htmlString dataUsingEncoding:NSUTF8StringEncoding];
     TFHpple* xpathParser = [[TFHpple alloc] initWithHTMLData:htmlData];
+    
+    NSMutableString* res=[[NSMutableString alloc] init];
+    //处理图片
+    @try {
+        TFHppleElement* image=[[xpathParser searchWithXPathQuery:@"//div[@id='mainImgDiv']"] firstObject];
+        NSMutableString* imageDiv=[image.raw mutableCopy];
+        NSRange widthRange=[imageDiv rangeOfString:@"width:"];
+        unsigned long endIndex=[imageDiv rangeOfString:@"px"].location;
+        widthRange=NSMakeRange(widthRange.length+widthRange.location,endIndex-widthRange.length-widthRange.location);
+        
+        int width=[[imageDiv substringWithRange:widthRange] intValue];
+        
+        NSRange heightRange=[imageDiv rangeOfString:@"height:"];
+        endIndex=[[imageDiv substringFromIndex:heightRange.location] rangeOfString:@"px"].location+widthRange.location+widthRange.length+3;
+        heightRange=NSMakeRange(heightRange.location+heightRange.length, endIndex-heightRange.length-heightRange.location);
+        int height=[[imageDiv substringWithRange:heightRange] intValue];
+        [imageDiv replaceCharactersInRange:widthRange withString:[NSString stringWithFormat:@"%d",310]];
+        [imageDiv replaceCharactersInRange:heightRange withString:[NSString stringWithFormat:@"%f",height/ ((float)width/310)]];
+        [imageDiv insertString:[NSString stringWithFormat:@"background-size:310px,%fpx;",height/ ((float)width/310)] atIndex:[imageDiv rangeOfString:@">"].location-1];
+        NSLog(@"%@",imageDiv);
+        [res appendString:imageDiv];
+    }
+    @catch (NSException *exception) {
+    
+    }
+    
+    //内容
     TFHppleElement* ele=[[xpathParser searchWithXPathQuery:@"//div[@class='newsStory']"] firstObject];
-    return ele.raw;
+    [res appendString:ele.raw];
+    
+    ///新闻不止一页
+    TFHppleElement* pageNumEle=[[xpathParser searchWithXPathQuery:@"//span[@id='phmaincontent_0_phcontent_0_ctl00_pgPaginator1']/span/text()"] firstObject];
+    NSRange range=[pageNumEle.content rangeOfString:@"的"];
+    int pageNum=[[pageNumEle.content substringFromIndex: range.location+1] intValue];
+
+    for (int i=2; i<=pageNum; i++)
+    {
+        [res appendString:[self getContentFromeCurrentUrl:[href stringByAppendingFormat:@"?pageno=%d",i] ] ];
+    }
+    return res;
 }
 
 -(NSString*) getNewsContentByHref:(NSString*)href
